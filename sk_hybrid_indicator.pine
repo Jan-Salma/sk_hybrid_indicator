@@ -1,0 +1,81 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © Ján Salma - jan-salma.com
+
+//@version=6
+indicator("Slovenský Hybrid (VWAP, Multi MA)", "JS VWAP/MA", true)
+
+// --- VŠEOBECNÉ NASTAVENIA ---
+string group_ma = "Multi Moving Average (MA)"
+string group_vwap = "VWAP"
+
+// --- NASTAVENIA PRE MOVING AVERAGES (MA) ---
+show_ma_group = input.bool(true, "Zobraziť Moving Averages", group = group_ma, inline = "ma_main")
+
+// MA 1 (predvolene vypnuté)
+show_ma1 = input.bool(true, "MA 1", group = group_ma, inline = "ma1")
+ma1_type = input.string("EMA", "", options = ["EMA", "SMA"], group = group_ma, inline = "ma1")
+ma1_len = input.int(20, "Dĺžka", group = group_ma, inline = "ma1")
+ma1_src = input.source(close, "Zdroj", group = group_ma, inline = "ma1")
+ma1_color = input.color(color.new(#FF6D00, 0), "Farba", group = group_ma, inline = "ma1")
+ma1_width = input.int(2, "Hrúbka", group = group_ma, inline = "ma1", minval = 1)
+
+// MA 2 (predvolene vypnuté)
+show_ma2 = input.bool(true, "MA 2", group = group_ma, inline = "ma2")
+ma2_type = input.string("EMA", "", options = ["EMA", "SMA"], group = group_ma, inline = "ma2")
+ma2_len = input.int(50, "Dĺžka", group = group_ma, inline = "ma2")
+ma2_src = input.source(close, "Zdroj", group = group_ma, inline = "ma2")
+ma2_color = input.color(color.new(#2962FF, 0), "Farba", group = group_ma, inline = "ma2")
+ma2_width = input.int(2, "Hrúbka", group = group_ma, inline = "ma2", minval = 1)
+
+// MA 3 (predvolene vypnuté)
+show_ma3 = input.bool(true, "MA 3", group = group_ma, inline = "ma3")
+ma3_type = input.string("SMA", "", options = ["EMA", "SMA"], group = group_ma, inline = "ma3")
+ma3_len = input.int(100, "Dĺžka", group = group_ma, inline = "ma3")
+ma3_src = input.source(close, "Zdroj", group = group_ma, inline = "ma3")
+ma3_color = input.color(color.new(#9C27B0, 0), "Farba", group = group_ma, inline = "ma3")
+ma3_width = input.int(1, "Hrúbka", group = group_ma, inline = "ma3", minval = 1)
+
+// MA 4 (predvolene vypnuté)
+show_ma4 = input.bool(true, "MA 4", group = group_ma, inline = "ma4")
+ma4_type = input.string("SMA", "", options = ["EMA", "SMA"], group = group_ma, inline = "ma4")
+ma4_len = input.int(200, "Dĺžka", group = group_ma, inline = "ma4")
+ma4_src = input.source(close, "Zdroj", group = group_ma, inline = "ma4")
+ma4_color = input.color(color.new(#E91E63, 0), "Farba", group = group_ma, inline = "ma4")
+ma4_width = input.int(1, "Hrúbka", group = group_ma, inline = "ma4", minval = 1)
+
+// --- NASTAVENIA PRE VWAP ---
+// (predvolene zapnuté)
+show_vwap = input.bool(true, "Zobraziť VWAP", group = group_vwap, inline = "vwap_main")
+vwap_color = input.color(color.new(#2196F3, 0), "Farba", group = group_vwap, inline = "vwap_color")
+vwap_width = input.int(2, "Hrúbka", group = group_vwap, inline = "vwap_color", minval = 1)
+
+// --- VÝPOČTY ---
+
+// Funkcia pre výpočet MA (EMA alebo SMA)
+f_ma(source, length, type) =>
+    float result = na
+    if type == "EMA"
+        result := ta.ema(source, length)
+    else if type == "SMA"
+        result := ta.sma(source, length)
+    result
+
+// Výpočet MA
+ma1 = show_ma1 and show_ma_group ? f_ma(ma1_src, ma1_len, ma1_type) : na
+ma2 = show_ma2 and show_ma_group ? f_ma(ma2_src, ma2_len, ma2_type) : na
+ma3 = show_ma3 and show_ma_group ? f_ma(ma3_src, ma3_len, ma3_type) : na
+ma4 = show_ma4 and show_ma_group ? f_ma(ma4_src, ma4_len, ma4_type) : na
+
+// Výpočet VWAP
+vwap_val = show_vwap ? ta.vwap : na
+
+// --- VYKRESLENIE INDIKÁTOROV ---
+
+// Vykreslenie MA
+plot(ma1, "MA 1", color = ma1_color, linewidth = ma1_width)
+plot(ma2, "MA 2", color = ma2_color, linewidth = ma2_width)
+plot(ma3, "MA 3", color = ma3_color, linewidth = ma3_width)
+plot(ma4, "MA 4", color = ma4_color, linewidth = ma4_width)
+
+// Vykreslenie VWAP
+plot(vwap_val, "VWAP", color = vwap_color, linewidth = vwap_width)
