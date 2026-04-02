@@ -1,57 +1,74 @@
 // This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
 // © Ján Salma - jan-salma.com
+//
+// ===== CHANGELOG =====
+// v1.0.0 (2025-08-29) - Základ: 4x MA (EMA/SMA) + VWAP (ta.vwap property)
+// v1.1.0 (2026-04-02) - VWAP Band s multiplikátorom (StdDev / Percentage)
+//                      - Source a Hide on 1D+ pre VWAP
+//                      - Bilingválne labels (SK/EN)
+//                      - Farba/hrúbka presunutá do Style tab
+//                      - Oprava: VWAP ciara pouziva ta.vwap property (zhodna s TV VWAP)
+//                      - Oprava: fill() color chyba CE10123
+//                      - Oprava: shorttitle limit 10 znakov
+// ======================
 
 //@version=6
-indicator("Slovenský Hybrid (VWAP, Multi MA)", "JS VWAP/MA", true)
+indicator("Slovak Hybrid (VWAP, Multi MA)", "JS VWAP/MA", true, timeframe="", timeframe_gaps=true)
 
-// --- VŠEOBECNÉ NASTAVENIA ---
-string group_ma = "Multi Moving Average (MA)"
+// --- GENERAL SETTINGS / VŠEOBECNÉ NASTAVENIA ---
+string group_ma   = "Moving Averages (MA)"
 string group_vwap = "VWAP"
+string group_band = "VWAP Band / Pás"
 
-// --- NASTAVENIA PRE MOVING AVERAGES (MA) ---
-show_ma_group = input.bool(true, "Zobraziť Moving Averages", group = group_ma, inline = "ma_main")
+// =============================================
+// MOVING AVERAGES
+// =============================================
+show_ma_group = input.bool(true, "Show MA / Zobraziť MA", group = group_ma)
 
-// MA 1 (predvolene vypnuté)
-show_ma1 = input.bool(true, "MA 1", group = group_ma, inline = "ma1")
-ma1_type = input.string("EMA", "", options = ["EMA", "SMA"], group = group_ma, inline = "ma1")
-ma1_len = input.int(20, "Dĺžka", group = group_ma, inline = "ma1")
-ma1_src = input.source(close, "Zdroj", group = group_ma, inline = "ma1")
-ma1_color = input.color(color.new(#FF6D00, 0), "Farba", group = group_ma, inline = "ma1")
-ma1_width = input.int(2, "Hrúbka", group = group_ma, inline = "ma1", minval = 1)
+// MA 1
+show_ma1  = input.bool(true, "MA 1", group = group_ma, inline = "ma1")
+ma1_type  = input.string("EMA", "", options = ["EMA", "SMA"], group = group_ma, inline = "ma1")
+ma1_len   = input.int(20, "Length / Dĺžka", group = group_ma, inline = "ma1")
+ma1_src   = input.source(close, "Source / Zdroj", group = group_ma, inline = "ma1")
 
-// MA 2 (predvolene vypnuté)
-show_ma2 = input.bool(true, "MA 2", group = group_ma, inline = "ma2")
-ma2_type = input.string("EMA", "", options = ["EMA", "SMA"], group = group_ma, inline = "ma2")
-ma2_len = input.int(50, "Dĺžka", group = group_ma, inline = "ma2")
-ma2_src = input.source(close, "Zdroj", group = group_ma, inline = "ma2")
-ma2_color = input.color(color.new(#2962FF, 0), "Farba", group = group_ma, inline = "ma2")
-ma2_width = input.int(2, "Hrúbka", group = group_ma, inline = "ma2", minval = 1)
+// MA 2
+show_ma2  = input.bool(true, "MA 2", group = group_ma, inline = "ma2")
+ma2_type  = input.string("EMA", "", options = ["EMA", "SMA"], group = group_ma, inline = "ma2")
+ma2_len   = input.int(50, "Length / Dĺžka", group = group_ma, inline = "ma2")
+ma2_src   = input.source(close, "Source / Zdroj", group = group_ma, inline = "ma2")
 
-// MA 3 (predvolene vypnuté)
-show_ma3 = input.bool(true, "MA 3", group = group_ma, inline = "ma3")
-ma3_type = input.string("SMA", "", options = ["EMA", "SMA"], group = group_ma, inline = "ma3")
-ma3_len = input.int(100, "Dĺžka", group = group_ma, inline = "ma3")
-ma3_src = input.source(close, "Zdroj", group = group_ma, inline = "ma3")
-ma3_color = input.color(color.new(#9C27B0, 0), "Farba", group = group_ma, inline = "ma3")
-ma3_width = input.int(1, "Hrúbka", group = group_ma, inline = "ma3", minval = 1)
+// MA 3
+show_ma3  = input.bool(true, "MA 3", group = group_ma, inline = "ma3")
+ma3_type  = input.string("SMA", "", options = ["EMA", "SMA"], group = group_ma, inline = "ma3")
+ma3_len   = input.int(100, "Length / Dĺžka", group = group_ma, inline = "ma3")
+ma3_src   = input.source(close, "Source / Zdroj", group = group_ma, inline = "ma3")
 
-// MA 4 (predvolene vypnuté)
-show_ma4 = input.bool(true, "MA 4", group = group_ma, inline = "ma4")
-ma4_type = input.string("SMA", "", options = ["EMA", "SMA"], group = group_ma, inline = "ma4")
-ma4_len = input.int(200, "Dĺžka", group = group_ma, inline = "ma4")
-ma4_src = input.source(close, "Zdroj", group = group_ma, inline = "ma4")
-ma4_color = input.color(color.new(#E91E63, 0), "Farba", group = group_ma, inline = "ma4")
-ma4_width = input.int(1, "Hrúbka", group = group_ma, inline = "ma4", minval = 1)
+// MA 4
+show_ma4  = input.bool(true, "MA 4", group = group_ma, inline = "ma4")
+ma4_type  = input.string("SMA", "", options = ["EMA", "SMA"], group = group_ma, inline = "ma4")
+ma4_len   = input.int(200, "Length / Dĺžka", group = group_ma, inline = "ma4")
+ma4_src   = input.source(close, "Source / Zdroj", group = group_ma, inline = "ma4")
 
-// --- NASTAVENIA PRE VWAP ---
-// (predvolene zapnuté)
-show_vwap = input.bool(true, "Zobraziť VWAP", group = group_vwap, inline = "vwap_main")
-vwap_color = input.color(color.new(#2196F3, 0), "Farba", group = group_vwap, inline = "vwap_color")
-vwap_width = input.int(2, "Hrúbka", group = group_vwap, inline = "vwap_color", minval = 1)
+// =============================================
+// VWAP
+// =============================================
+show_vwap    = input.bool(true, "Show VWAP / Zobraziť VWAP", group = group_vwap)
+vwap_src     = input.source(hlc3, "Source / Zdroj", group = group_vwap)
+hideonDWM    = input.bool(false, "Hide on 1D+ / Skryť na 1D+", group = group_vwap)
 
-// --- VÝPOČTY ---
+// =============================================
+// VWAP BAND / PÁS
+// =============================================
+CALC_MODE_TIP = "Standard Deviation = absolute deviation from VWAP. Percentage = 1 multiplier means 1%."
+show_band     = input.bool(false, "Show Band / Zobraziť pás", group = group_band, inline = "band1")
+bandMult      = input.float(1.0, "Multiplier / Multiplikátor", group = group_band, inline = "band1", step = 0.5, minval = 0)
+calcMode      = input.string("Standard Deviation", "Mode / Režim", options = ["Standard Deviation", "Percentage"], group = group_band, tooltip = CALC_MODE_TIP)
 
-// Funkcia pre výpočet MA (EMA alebo SMA)
+// =============================================
+// CALCULATIONS / VÝPOČTY
+// =============================================
+
+// --- MA calculation ---
 f_ma(source, length, type) =>
     float result = na
     if type == "EMA"
@@ -60,22 +77,43 @@ f_ma(source, length, type) =>
         result := ta.sma(source, length)
     result
 
-// Výpočet MA
 ma1 = show_ma1 and show_ma_group ? f_ma(ma1_src, ma1_len, ma1_type) : na
 ma2 = show_ma2 and show_ma_group ? f_ma(ma2_src, ma2_len, ma2_type) : na
 ma3 = show_ma3 and show_ma_group ? f_ma(ma3_src, ma3_len, ma3_type) : na
 ma4 = show_ma4 and show_ma_group ? f_ma(ma4_src, ma4_len, ma4_type) : na
 
-// Výpočet VWAP
-vwap_val = show_vwap ? ta.vwap : na
+// --- VWAP + Band calculation ---
 
-// --- VYKRESLENIE INDIKÁTOROV ---
+// ta.vwap property — identicky s TV vestavanym VWAP indikatorom (overene v1.0)
+hideVwap = hideonDWM and timeframe.isdwm
+float vwapValue      = show_vwap and not hideVwap ? ta.vwap : na
+float upperBandValue = na
+float lowerBandValue = na
 
-// Vykreslenie MA
-plot(ma1, "MA 1", color = ma1_color, linewidth = ma1_width)
-plot(ma2, "MA 2", color = ma2_color, linewidth = ma2_width)
-plot(ma3, "MA 3", color = ma3_color, linewidth = ma3_width)
-plot(ma4, "MA 4", color = ma4_color, linewidth = ma4_width)
+// Pas: ta.vwap() funkcia sa pouziva IBA na ziskanie stdev — VWAP ciara ostava ta.vwap property
+if show_band and not na(vwapValue)
+    [_vwap_func, _stdevUpper, _] = ta.vwap(vwap_src, timeframe.change("D"), 1)
+    stdevAbs  = _stdevUpper - _vwap_func
+    bandBasis = calcMode == "Standard Deviation" ? stdevAbs : ta.vwap * 0.01
+    upperBandValue := ta.vwap + bandBasis * bandMult
+    lowerBandValue := ta.vwap - bandBasis * bandMult
 
-// Vykreslenie VWAP
-plot(vwap_val, "VWAP", color = vwap_color, linewidth = vwap_width)
+// =============================================
+// PLOTS / VYKRESLENIE
+// Farba, hrúbka a typ čiary sa nastavujú v Style tab
+// =============================================
+
+// MA
+plot(ma1, "MA 1", color = #FF6D00, linewidth = 2)
+plot(ma2, "MA 2", color = #2962FF, linewidth = 2)
+plot(ma3, "MA 3", color = #9C27B0, linewidth = 1)
+plot(ma4, "MA 4", color = #E91E63, linewidth = 1)
+
+// VWAP
+plot(vwapValue, "VWAP", color = #2196F3, linewidth = 2)
+
+// VWAP Band
+displayBand = show_band ? display.all : display.none
+upperBand = plot(upperBandValue, "Upper Band", color = #26A69A, display = displayBand)
+lowerBand = plot(lowerBandValue, "Lower Band", color = #26A69A, display = displayBand)
+fill(upperBand, lowerBand, color = color.new(#26A69A, 90), title = "Band Fill", display = displayBand)

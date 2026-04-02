@@ -1,28 +1,33 @@
-# Slovensky Hybrid (VWAP, Multi MA) – JS VWAP/MA
+# Slovak Hybrid (VWAP, Multi MA) – JS VWAP/MA
 
-Tento indikator som vytvoril ja, **Jan Salma** – mentor Akademie, specialne pre slovensky trh. Je navrhnuy tak, aby ho bolo mozne pouzivat aj na **bezplatnej verzii TradingView** a zaroven aby ostal priestor na pridanie dalsich vlastnych indikatorov.
+Tento indikator som vytvoril ja, **Jan Salma** – mentor Akademie, specialne pre slovensky trh. Je navrhnuty tak, aby ho bolo mozne pouzivat aj na **bezplatnej verzii TradingView** a zaroven aby ostal priestor na pridanie dalsich vlastnych indikatorov.
 
-> Coskoro pribude nova verzia, ktora bude obsahovat este viac nastrojov v jednom baliku.
+> Coskoro pribudnu dalsie nastroje v jednom baliku.
+
+---
+
+## Changelog / Historia zmien
+
+| Verzia | Datum | Zmeny |
+|--------|-------|-------|
+| **v1.1.0** | 2026-04-02 | VWAP Band s multiplikatorom (StdDev / Percentage). Source a Hide on 1D+ pre VWAP. Bilingvalne labels (SK/EN). Farba/hrubka presunutá do Style tab. Oprava VWAP ciary (ta.vwap property = zhodna s TV VWAP). Oprava fill() CE10123. |
+| **v1.0.0** | 2025-08-29 | Zaklad: 4x Moving Average (EMA/SMA) + VWAP. |
 
 ---
 
 ## Funkcie a nastavenia
 
-Indikator kombinuje viacero klucovych prvkov technickej analyzy do jedneho nastroja:
+### Moving Averages (MA)
 
-### Multi Moving Averages (MA)
-
-- Mozes zobrazit az **4 rozne klzave priemery**
-- Kazdy MA sa da zapnut alebo vypnut podla potreby
-- Moznost nastavit dlzku periody
-- Vyber typu: **SMA** alebo **EMA**
-- Nastavenie zdroja ceny (Close, Open, High, Low, atd.)
-- Moznost upravit farbu a hrubku ciary pre lepsi prehlad
+- Az **4 klzave priemery** — kazdy sa da zapnut/vypnut
+- Typ: **EMA** alebo **SMA**
+- Nastavitelna dlzka periody a zdroj ceny
+- Farba a hrubka ciary sa nastavuju v **Style tab**
 
 **Predvolene nastavenia:**
 
-| MA | Typ | Dlzka | Farba |
-|----|-----|-------|-------|
+| MA | Typ | Dlzka | Predvolena farba |
+|----|-----|-------|-----------------|
 | MA 1 | EMA | 20 | Oranzova |
 | MA 2 | EMA | 50 | Modra |
 | MA 3 | SMA | 100 | Fialova |
@@ -30,17 +35,26 @@ Indikator kombinuje viacero klucovych prvkov technickej analyzy do jedneho nastr
 
 ### VWAP (Volume Weighted Average Price)
 
-- VWAP sa da zapnut alebo vypnut
-- Nastavenie farby a hrubky ciary
+- Zapni/vypni
+- Source (predvolene HLC3) — zhodny s TV vestanym VWAP
+- Hide on 1D+ — skryje VWAP na dennych a vyssich TF
+- Farba a hrubka v **Style tab**
+
+### VWAP Band / Pas (v1.1+)
+
+- Zapni/vypni multiplikacny pas okolo VWAP
+- Nastavitelny multiplikator (predvolene 1.0, krok 0.5)
+- Rezim: **Standard Deviation** alebo **Percentage**
+- Farba a priehladnost v **Style tab**
 
 ---
 
-## Vyhody indikatora
+## Vyhody
 
-- Jednoduche a prehladne nastavenia v **slovenskom jazyku**
-- Idealne pre zaciatocnikov aj pokrocilych traderov
-- Kombinuje viacero indikatorov do jedneho, co **setri miesto v grafe**
-- Umoznuje flexibilne prisposobit vzhlad podla vlastneho stylu obchodovania
+- Bilingvalne nastavenia **(SK/EN)**
+- Inputs tab je cisty — len logika, farby v Style tab
+- VWAP ciara je identická s vestavanym TradingView VWAP
+- Kombinuje viacero nastrojov do jedneho — setri miesto v grafe
 
 ---
 
@@ -49,41 +63,41 @@ Indikator kombinuje viacero klucovych prvkov technickej analyzy do jedneho nastr
 1. Skopiruj kod zo suboru `sk_hybrid_indicator.pine`
 2. V TradingView otvor **Pine Editor**
 3. Vloz kod a klikni na **Pridat do grafu**
-4. Uprav nastavenia podla svojich preferencii
+4. Inputs tab — nastav typy a dlzky MA, zapni VWAP/Band
+5. Style tab — uprav farby a hrubky podla svojho stylu
 
 ---
 
-Tento nastroj je vybornou pomockou pre kazdeho, kto sa chce zamerat na cisty graf, prehladne nastavenia a efektivne vyuzitie TradingView.
+# Slovak Hybrid (VWAP, Multi MA) – JS VWAP/MA (EN)
+
+This indicator was created by **Jan Salma** – mentor of the Slovak Academy, especially for the Slovak market. Designed for the **free version of TradingView**.
+
+## Changelog
+
+| Version | Date | Changes |
+|---------|------|---------|
+| **v1.1.0** | 2026-04-02 | VWAP Band with multiplier (StdDev / Percentage). Source & Hide on 1D+ for VWAP. Bilingual labels (SK/EN). Color/width moved to Style tab. Fix: VWAP uses ta.vwap property (matches TV VWAP). Fix: fill() CE10123 error. |
+| **v1.0.0** | 2025-08-29 | Initial: 4x Moving Average (EMA/SMA) + VWAP. |
+
+## Features
+
+### Moving Averages (MA)
+- Up to **4 MAs** — each toggleable individually
+- Type: **EMA** or **SMA**, adjustable length and source
+- Color & width in **Style tab**
+
+### VWAP
+- Toggleable, source input (default HLC3)
+- Hide on 1D+ option
+- Identical to TradingView built-in VWAP
+- Color & width in **Style tab**
+
+### VWAP Band (v1.1+)
+- Toggleable band around VWAP
+- Adjustable multiplier (default 1.0)
+- Mode: **Standard Deviation** or **Percentage**
+- Color & transparency in **Style tab**
 
 ---
 
-# Slovak Hybrid (VWAP, Multi MA) – JS VWAP/MA
-
-This indicator was created by **Jan Salma** – mentor of the Slovak Academy, especially for the Slovak market. It is designed to work even on the **free version of TradingView**, while keeping space for additional indicators on your chart.
-
-> A new version with more tools combined in one indicator is coming soon!
-
-## Features and Settings
-
-### Multi Moving Averages (MA)
-
-- Up to **4 customizable moving averages**
-- Each MA can be turned on/off individually
-- Choose between **EMA** or **SMA**
-- Adjustable length, source, line width, and color
-
-### VWAP (Volume Weighted Average Price)
-
-- Can be enabled/disabled
-- Adjustable line thickness and color
-
-## Benefits
-
-- Simple and intuitive settings in Slovak language
-- Great for both beginners and advanced traders
-- Combines multiple indicators into one — saves chart space
-- Fully customizable look to fit your trading style
-
----
-
-A clean, flexible, and easy-to-use indicator for every trader who wants efficiency and clarity in their charts.
+A clean, flexible indicator combining multiple tools in one — efficiency and clarity for every trader.
