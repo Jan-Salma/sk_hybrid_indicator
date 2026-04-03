@@ -10,18 +10,19 @@ Tento indikator som vytvoril ja, **Jan Salma** – mentor Akademie, specialne pr
 
 | Verzia | Datum | Zmeny |
 |--------|-------|-------|
-| **v1.1.0** | 2026-04-02 | VWAP Band s multiplikatorom (StdDev / Percentage). Source a Hide on 1D+ pre VWAP. Bilingvalne labels (SK/EN). Farba/hrubka presunutá do Style tab. Oprava VWAP ciary (ta.vwap property = zhodna s TV VWAP). Oprava fill() CE10123. |
+| **v1.2.0** | 2026-04-03 | Oprava kritickeho VWAP source bugu (ta.vwap property ignoroval source input — nahradeny spravnou ta.vwap() funkciou podla TV originalu). Pridany VWMA. Tri oddelene skupiny: MA → VWMA → VWAP. Source audit vsetkych komponentov. |
+| **v1.1.0** | 2026-04-02 | VWAP Band s multiplikatorom (StdDev / Percentage). Source a Hide on 1D+ pre VWAP. Bilingvalne labels (SK/EN). Farba/hrubka presunutá do Style tab. |
 | **v1.0.0** | 2025-08-29 | Zaklad: 4x Moving Average (EMA/SMA) + VWAP. |
 
 ---
 
 ## Funkcie a nastavenia
 
-### Moving Averages (MA)
+### 1. Moving Averages (MA)
 
 - Az **4 klzave priemery** — kazdy sa da zapnut/vypnut
 - Typ: **EMA** alebo **SMA**
-- Nastavitelna dlzka periody a zdroj ceny
+- Nastavitelna dlzka periody a zdroj ceny (close, open, high, low, hlc3, atd.)
 - Farba a hrubka ciary sa nastavuju v **Style tab**
 
 **Predvolene nastavenia:**
@@ -33,11 +34,20 @@ Tento indikator som vytvoril ja, **Jan Salma** – mentor Akademie, specialne pr
 | MA 3 | SMA | 100 | Fialova |
 | MA 4 | SMA | 200 | Ruzova |
 
-### VWAP (Volume Weighted Average Price)
+### 2. Volume Weighted Moving Average (VWMA) — v1.2+
+
+- Zapni/vypni VWMA samostatne (predvolene vypnuty)
+- Nastavitelna dlzka periody (predvolene 20)
+- Nastavitelny zdroj ceny (predvolene close)
+- Pouziva `ta.vwma()` — identicky s TV vestavanym VWMA indikatorom
+- Farba a hrubka v **Style tab**
+
+### 3. VWAP (Volume Weighted Average Price)
 
 - Zapni/vypni
-- Source (predvolene HLC3) — zhodny s TV vestanym VWAP
+- Source — zdroj ceny (predvolene HLC3) — **funguje spravne pre vsetky zdroje**
 - Hide on 1D+ — skryje VWAP na dennych a vyssich TF
+- Implementacia zhodna s originalnym TradingView VWAP indikatorom
 - Farba a hrubka v **Style tab**
 
 ### VWAP Band / Pas (v1.1+)
@@ -49,11 +59,23 @@ Tento indikator som vytvoril ja, **Jan Salma** – mentor Akademie, specialne pr
 
 ---
 
+## Technicke poznamky / Source Audit
+
+| Komponent | Funkcia | Source input | Stav |
+|-----------|---------|-------------|------|
+| MA 1–4 | `ta.ema()` / `ta.sma()` | `input.source(close)` | OK |
+| VWMA | `ta.vwma()` | `input.source(close)` | OK |
+| VWAP | `ta.vwap(src, isNewPeriod, 1)` | `input.source(hlc3)` | OK (opravene v1.2) |
+
+> **Bug v1.1:** `ta.vwap` property vzdy pouzivala `hlc3` bez ohladu na nastaveny source. Opravene v **v1.2.0** — VWAP teraz pouziva `ta.vwap()` funkciu presne podla TV VWAP originalu.
+
+---
+
 ## Vyhody
 
 - Bilingvalne nastavenia **(SK/EN)**
 - Inputs tab je cisty — len logika, farby v Style tab
-- VWAP ciara je identická s vestavanym TradingView VWAP
+- VWAP implementacia zhodna s TV VWAP (overena)
 - Kombinuje viacero nastrojov do jedneho — setri miesto v grafe
 
 ---
@@ -63,7 +85,7 @@ Tento indikator som vytvoril ja, **Jan Salma** – mentor Akademie, specialne pr
 1. Skopiruj kod zo suboru `sk_hybrid_indicator.pine`
 2. V TradingView otvor **Pine Editor**
 3. Vloz kod a klikni na **Pridat do grafu**
-4. Inputs tab — nastav typy a dlzky MA, zapni VWAP/Band
+4. Inputs tab — nastav typy, dlzky, zdroje; zapni VWMA / Band podla potreby
 5. Style tab — uprav farby a hrubky podla svojho stylu
 
 ---
@@ -76,27 +98,41 @@ This indicator was created by **Jan Salma** – mentor of the Slovak Academy, es
 
 | Version | Date | Changes |
 |---------|------|---------|
-| **v1.1.0** | 2026-04-02 | VWAP Band with multiplier (StdDev / Percentage). Source & Hide on 1D+ for VWAP. Bilingual labels (SK/EN). Color/width moved to Style tab. Fix: VWAP uses ta.vwap property (matches TV VWAP). Fix: fill() CE10123 error. |
+| **v1.2.0** | 2026-04-03 | Critical VWAP source bug fix (ta.vwap property ignored source input — replaced with ta.vwap() function matching TV original). Added VWMA. Three separate groups: MA → VWMA → VWAP. Source audit of all components. |
+| **v1.1.0** | 2026-04-02 | VWAP Band with multiplier (StdDev / Percentage). Source & Hide on 1D+ for VWAP. Bilingual labels (SK/EN). Color/width moved to Style tab. |
 | **v1.0.0** | 2025-08-29 | Initial: 4x Moving Average (EMA/SMA) + VWAP. |
 
 ## Features
 
-### Moving Averages (MA)
+### 1. Moving Averages (MA)
 - Up to **4 MAs** — each toggleable individually
 - Type: **EMA** or **SMA**, adjustable length and source
 - Color & width in **Style tab**
 
-### VWAP
-- Toggleable, source input (default HLC3)
+### 2. Volume Weighted Moving Average (VWMA) — v1.2+
+- Toggleable (off by default)
+- Adjustable length (default 20) and source (default close)
+- Uses `ta.vwma()` — identical to TradingView built-in VWMA
+- Color & width in **Style tab**
+
+### 3. VWAP
+- Toggleable, source input (default HLC3) — **works correctly for all sources**
 - Hide on 1D+ option
-- Identical to TradingView built-in VWAP
+- Implementation matches original TradingView VWAP exactly
 - Color & width in **Style tab**
 
 ### VWAP Band (v1.1+)
 - Toggleable band around VWAP
-- Adjustable multiplier (default 1.0)
-- Mode: **Standard Deviation** or **Percentage**
+- Adjustable multiplier (default 1.0), mode: Standard Deviation or Percentage
 - Color & transparency in **Style tab**
+
+## Source Audit
+
+| Component | Function | Source input | Status |
+|-----------|----------|-------------|--------|
+| MA 1–4 | `ta.ema()` / `ta.sma()` | `input.source(close)` | OK |
+| VWMA | `ta.vwma()` | `input.source(close)` | OK |
+| VWAP | `ta.vwap(src, isNewPeriod, 1)` | `input.source(hlc3)` | OK (fixed v1.2) |
 
 ---
 

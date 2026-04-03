@@ -7,22 +7,21 @@
 //                      - Source a Hide on 1D+ pre VWAP
 //                      - Bilingválne labels (SK/EN)
 //                      - Farba/hrúbka presunutá do Style tab
-//                      - Oprava: VWAP ciara pouziva ta.vwap property (zhodna s TV VWAP)
-//                      - Oprava: fill() color chyba CE10123
-//                      - Oprava: shorttitle limit 10 znakov
+// v1.2.0 (2026-04-03) - Oprava: VWAP source bug — ta.vwap property ignoroval vwap_src input,
+//                        nahradený ta.vwap() funkciou podľa originálu TV VWAP
+//                      - Pridaný VWMA (Volume Weighted Moving Average)
+//                      - Tri samostatné skupiny: MA, VWMA, VWAP
+//                      - Source audit: všetky komponenty správne používajú input.source()
 // ======================
 
 //@version=6
 indicator("Slovak Hybrid (VWAP, Multi MA)", "JS VWAP/MA", true, timeframe="", timeframe_gaps=true)
 
-// --- GENERAL SETTINGS / VŠEOBECNÉ NASTAVENIA ---
-string group_ma   = "Moving Averages (MA)"
-string group_vwap = "VWAP"
-string group_band = "VWAP Band / Pás"
+// =============================================
+// 1. MOVING AVERAGES (MA)
+// =============================================
+string group_ma = "Moving Averages (MA)"
 
-// =============================================
-// MOVING AVERAGES
-// =============================================
 show_ma_group = input.bool(true, "Show MA / Zobraziť MA", group = group_ma)
 
 // MA 1
@@ -50,15 +49,25 @@ ma4_len   = input.int(200, "Length / Dĺžka", group = group_ma, inline = "ma4")
 ma4_src   = input.source(close, "Source / Zdroj", group = group_ma, inline = "ma4")
 
 // =============================================
-// VWAP
+// 2. VOLUME WEIGHTED MOVING AVERAGE (VWMA)
 // =============================================
+string group_vwma = "Volume Weighted Moving Average (VWMA)"
+
+show_vwma   = input.bool(false, "Show VWMA / Zobraziť VWMA", group = group_vwma)
+vwma_len    = input.int(20, "Length / Dĺžka", group = group_vwma, minval = 1)
+vwma_src    = input.source(close, "Source / Zdroj", group = group_vwma)
+
+// =============================================
+// 3. VWAP
+// =============================================
+string group_vwap = "VWAP"
+string group_band = "VWAP Band / Pás"
+
 show_vwap    = input.bool(true, "Show VWAP / Zobraziť VWAP", group = group_vwap)
 vwap_src     = input.source(hlc3, "Source / Zdroj", group = group_vwap)
 hideonDWM    = input.bool(false, "Hide on 1D+ / Skryť na 1D+", group = group_vwap)
 
-// =============================================
-// VWAP BAND / PÁS
-// =============================================
+// VWAP Band
 CALC_MODE_TIP = "Standard Deviation = absolute deviation from VWAP. Percentage = 1 multiplier means 1%."
 show_band     = input.bool(false, "Show Band / Zobraziť pás", group = group_band, inline = "band1")
 bandMult      = input.float(1.0, "Multiplier / Multiplikátor", group = group_band, inline = "band1", step = 0.5, minval = 0)
@@ -68,7 +77,7 @@ calcMode      = input.string("Standard Deviation", "Mode / Režim", options = ["
 // CALCULATIONS / VÝPOČTY
 // =============================================
 
-// --- MA calculation ---
+// --- MA ---
 f_ma(source, length, type) =>
     float result = na
     if type == "EMA"
@@ -82,21 +91,29 @@ ma2 = show_ma2 and show_ma_group ? f_ma(ma2_src, ma2_len, ma2_type) : na
 ma3 = show_ma3 and show_ma_group ? f_ma(ma3_src, ma3_len, ma3_type) : na
 ma4 = show_ma4 and show_ma_group ? f_ma(ma4_src, ma4_len, ma4_type) : na
 
-// --- VWAP + Band calculation ---
+// --- VWMA ---
+vwmaValue = show_vwma ? ta.vwma(vwma_src, vwma_len) : na
 
-// ta.vwap property — identicky s TV vestavanym VWAP indikatorom (overene v1.0)
-hideVwap = hideonDWM and timeframe.isdwm
-float vwapValue      = show_vwap and not hideVwap ? ta.vwap : na
+// --- VWAP + Band ---
+// Podla originalneho TV VWAP: isNewPeriod sa pocita VZDY (nekondicionalne)
+isNewPeriod = timeframe.change("D")
+if na(vwap_src[1])
+    isNewPeriod := true
+
+float vwapValue      = na
 float upperBandValue = na
 float lowerBandValue = na
 
-// Pas: ta.vwap() funkcia sa pouziva IBA na ziskanie stdev — VWAP ciara ostava ta.vwap property
-if show_band and not na(vwapValue)
-    [_vwap_func, _stdevUpper, _] = ta.vwap(vwap_src, timeframe.change("D"), 1)
-    stdevAbs  = _stdevUpper - _vwap_func
-    bandBasis = calcMode == "Standard Deviation" ? stdevAbs : ta.vwap * 0.01
-    upperBandValue := ta.vwap + bandBasis * bandMult
-    lowerBandValue := ta.vwap - bandBasis * bandMult
+// ta.vwap() funkcia vnútri chart-konstantnej podmienky (bezi na KAZDOM bare)
+// Presne podla originalneho TV VWAP indikatora
+if not (hideonDWM and timeframe.isdwm)
+    [_vwap, _stdevUpper, _] = ta.vwap(vwap_src, isNewPeriod, 1)
+    vwapValue := show_vwap ? _vwap : na
+    if show_band and show_vwap
+        stdevAbs  = _stdevUpper - _vwap
+        bandBasis = calcMode == "Standard Deviation" ? stdevAbs : _vwap * 0.01
+        upperBandValue := _vwap + bandBasis * bandMult
+        lowerBandValue := _vwap - bandBasis * bandMult
 
 // =============================================
 // PLOTS / VYKRESLENIE
@@ -109,11 +126,14 @@ plot(ma2, "MA 2", color = #2962FF, linewidth = 2)
 plot(ma3, "MA 3", color = #9C27B0, linewidth = 1)
 plot(ma4, "MA 4", color = #E91E63, linewidth = 1)
 
+// VWMA
+plot(vwmaValue, "VWMA", color = #FF9800, linewidth = 2)
+
 // VWAP
 plot(vwapValue, "VWAP", color = #2196F3, linewidth = 2)
 
 // VWAP Band
-displayBand = show_band ? display.all : display.none
+displayBand = show_band and show_vwap ? display.all : display.none
 upperBand = plot(upperBandValue, "Upper Band", color = #26A69A, display = displayBand)
 lowerBand = plot(lowerBandValue, "Lower Band", color = #26A69A, display = displayBand)
 fill(upperBand, lowerBand, color = color.new(#26A69A, 90), title = "Band Fill", display = displayBand)
