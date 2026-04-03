@@ -93,7 +93,7 @@ This indicator was created by **Ján Salma** – mentor of the Slovak Academy, e
 
 ---
 
-# Slovak Hybrid (VWAP, Multi MA) – JS VWAP/MA
+# Slovenský Hybrid (VWAP, Multi MA) – JS VWAP/MA
 
 Tento indikátor som vytvoril ja, **Ján Salma** – mentor Akadémie, špeciálne pre slovenský trh. Je navrhnutý tak, aby ho bolo možné používať aj na **bezplatnej verzii TradingView** a zároveň aby ostal priestor na pridanie ďalších vlastných indikátorov.
 
@@ -103,24 +103,24 @@ Tento indikátor som vytvoril ja, **Ján Salma** – mentor Akadémie, špeciál
 
 ---
 
-## Changelog / História zmien
+## História zmien
 
 | Verzia | Dátum | Zmeny |
 |--------|-------|-------|
 | **v1.2.0** | 2026-04-03 | Oprava kritického VWAP source bugu — `ta.vwap` property ignoroval source input, nahradený správnou `ta.vwap()` funkciou podľa TV originálu. Pridaný VWMA. Tri oddelené skupiny: MA → VWMA → VWAP. Source audit všetkých komponentov. |
 | **v1.1.0** | 2026-04-02 | VWAP Band s multiplikátorom (StdDev / Percentage). Source a Hide on 1D+ pre VWAP. Bilingválne labels (SK/EN). Farba/hrúbka presunutá do Style tab. |
-| **v1.0.0** | 2025-08-29 | Základ: 4x Moving Average (EMA/SMA) + VWAP. |
+| **v1.0.0** | 2025-08-29 | Základ: 4x pohyblivý priemer (EMA/SMA) + VWAP. |
 
 ---
 
 ## Funkcie a nastavenia
 
-### 1. Moving Averages (MA)
+### 1. Pohyblivé priemery (MA)
 
 - Až **4 kĺzavé priemery** — každý sa dá zapnúť/vypnúť
 - Typ: **EMA** alebo **SMA**
 - Nastaviteľná dĺžka periódy a zdroj ceny (close, open, high, low, hlc3 atď.)
-- Farba a hrúbka čiary sa nastavujú v **Style tab**
+- Farba a hrúbka čiary sa nastavujú v záložke **Štýl**
 
 **Predvolené nastavenia:**
 
@@ -131,48 +131,48 @@ Tento indikátor som vytvoril ja, **Ján Salma** – mentor Akadémie, špeciál
 | MA 3 | SMA | 100 | Fialová |
 | MA 4 | SMA | 200 | Ružová |
 
-### 2. Volume Weighted Moving Average (VWMA) — v1.2+
+### 2. Objemovo vážený pohyblivý priemer (VWMA) — v1.2+
 
 - Zapni/vypni VWMA samostatne (predvolene vypnutý)
 - Nastaviteľná dĺžka periódy (predvolene 20)
 - Nastaviteľný zdroj ceny (predvolene close)
-- Používa `ta.vwma()` — identický s TV vstavaným VWMA indikátorom
-- Farba a hrúbka v **Style tab**
+- Používa `ta.vwma()` — identický s vstavaným VWMA nástrojom TradingView
+- Farba a hrúbka v záložke **Štýl**
 
-### 3. VWAP (Volume Weighted Average Price)
+### 3. VWAP (objemovo vážená priemerná cena)
 
 - Zapni/vypni
-- Source — zdroj ceny (predvolene HLC3) — **funguje správne pre všetky zdroje** (opravené v1.2)
-- Hide on 1D+ — skryje VWAP na denných a vyšších TF
-- Implementácia zhodná s originálnym TradingView VWAP indikátorom
-- Farba a hrúbka v **Style tab**
+- Zdroj ceny (predvolene HLC3) — **funguje správne pre všetky zdroje** (opravené v1.2)
+- Skryť na 1D+ — skryje VWAP na denných a vyšších časových rámcoch
+- Implementácia zhodná s originálnym VWAP nástrojom TradingView
+- Farba a hrúbka v záložke **Štýl**
 
-### VWAP Band / Pás (v1.1+)
+### Pás VWAP (v1.1+)
 
 - Zapni/vypni multiplikačný pás okolo VWAP
 - Nastaviteľný multiplikátor (predvolene 1.0, krok 0.5)
-- Režim: **Standard Deviation** alebo **Percentage**
-- Farba a priehľadnosť v **Style tab**
+- Režim: **Smerodajná odchýlka** alebo **Percentuálny**
+- Farba a priehľadnosť v záložke **Štýl**
 
 ---
 
-## Technické poznámky / Source Audit
+## Technické poznámky
 
-| Komponent | Funkcia | Source input | Stav |
-|-----------|---------|-------------|------|
+| Komponent | Funkcia | Vstupný zdroj | Stav |
+|-----------|---------|---------------|------|
 | MA 1–4 | `ta.ema()` / `ta.sma()` | `input.source(close)` | ✅ OK |
 | VWMA | `ta.vwma()` | `input.source(close)` | ✅ OK |
 | VWAP | `ta.vwap(src, isNewPeriod, 1)` | `input.source(hlc3)` | ✅ Opravené v1.2 |
 
-> **Bug v1.1:** `ta.vwap` property vždy používala `hlc3` bez ohľadu na nastavený source. Opravené vo **v1.2.0** — VWAP teraz používa `ta.vwap()` funkciu presne podľa TV VWAP originálu.
+> **Chyba vo v1.1:** `ta.vwap` property vždy používala `hlc3` bez ohľadu na nastavený zdroj. Opravené vo **v1.2.0** — VWAP teraz používa funkciu `ta.vwap()` presne podľa originálu TradingView.
 
 ---
 
 ## Výhody
 
-- Bilingválne nastavenia **(SK/EN)**
-- Inputs tab je čistý — len logika, farby v Style tab
-- VWAP implementácia zhodná s TV VWAP (overená)
+- Dvojjazyčné nastavenia **(SK/EN)**
+- Záložka Vstupy je čistá — len logika, farby v záložke Štýl
+- Implementácia VWAP overená voči originálu TradingView
 - Kombinuje viacero nástrojov do jedného — šetrí miesto v grafe
 
 ---
@@ -182,8 +182,8 @@ Tento indikátor som vytvoril ja, **Ján Salma** – mentor Akadémie, špeciál
 1. Skopíruj kód zo súboru `sk_hybrid_indicator.pine`
 2. V TradingView otvor **Pine Editor**
 3. Vlož kód a klikni na **Pridať do grafu**
-4. Inputs tab — nastav typy, dĺžky, zdroje; zapni VWMA / Band podľa potreby
-5. Style tab — uprav farby a hrúbky podľa svojho štýlu
+4. Záložka Vstupy — nastav typy, dĺžky, zdroje; zapni VWMA / Pás podľa potreby
+5. Záložka Štýl — uprav farby a hrúbky podľa svojho štýlu obchodovania
 
 ---
 
